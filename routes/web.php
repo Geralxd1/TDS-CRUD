@@ -34,8 +34,14 @@ Route::middleware([
     'verified',
 ])->group(function () {
     Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
+        return Inertia::render('DashboardPrueba');
     })->name('dashboard');
+
+    //p
+    Route::get('/dashboard/prueba', function () {
+        return Inertia::render('DashboardPrueba');
+    })->name('dashboard.prueba');
+    
 
     Route::resource('estudiantes', EstudiantesController::class);
 
