@@ -1,7 +1,7 @@
 import { router } from '@inertiajs/core';
 import { Link, Head } from '@inertiajs/react';
 import classNames from 'classnames';
-import React, { PropsWithChildren, useState } from 'react';
+import React, { PropsWithChildren, useState, useEffect } from 'react';
 import useRoute from '@/Hooks/useRoute';
 import useTypedPage from '@/Hooks/useTypedPage';
 import ApplicationMark from '@/Components/ApplicationMark';
@@ -11,6 +11,18 @@ import DropdownLink from '@/Components/DropdownLink';
 import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Team } from '@/types';
+
+// import { useAuth } from '@/Contexts/AuthContext';
+import Can from '@/Components/Can';
+
+import { useDispatch } from 'react-redux';
+import { usePage } from '@inertiajs/react';
+import {
+	setUser,
+	setRoles,
+	setPermissions,
+	logoutt,
+} from '../store/features/auth/authSlice';
 
 // import { Image } from '@mantine/core';
 // import logo from '/resources/images/LogoUNAP.png';
@@ -33,6 +45,17 @@ export default function AppLayout({
 	children,
 }: PropsWithChildren<Props>) {
 	const page = useTypedPage();
+	const dispatch = useDispatch();
+	const { props } = usePage();
+
+	useEffect(() => {
+		if (props.auth.user) {
+			dispatch(setUser(props.auth.user));
+			dispatch(setRoles(props.auth.roles));
+			dispatch(setPermissions(props.auth.permissions));
+		}
+	}, [props.auth]);
+
 	const route = useRoute();
 	const [showingNavigationDropdown, setShowingNavigationDropdown] =
 		useState(false);
@@ -52,8 +75,15 @@ export default function AppLayout({
 
 	function logout(e: React.FormEvent) {
 		e.preventDefault();
+		dispatch(logoutt());
 		router.post(route('logout'));
 	}
+
+	// const { roles, permissions } = useAuth();
+
+	// // Agrega estas líneas para depurar
+	// console.log('Roles del usuario en el contexto', roles);
+	// console.log('Permisos del usuario en el contexto', permissions);
 
 	return (
 		<div>
@@ -95,6 +125,19 @@ export default function AppLayout({
 										Estudiantes
 									</NavLink>
 								</div>
+
+								<Can perform="user.index">
+									<div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
+										<NavLink
+											href={route('user.index')}
+											active={route().current(
+												'user.index',
+											)}
+										>
+											Usuarios
+										</NavLink>
+									</div>
+								</Can>
 							</div>
 
 							<div className="hidden sm:flex sm:items-center sm:ml-6">
@@ -369,6 +412,15 @@ export default function AppLayout({
 							</ResponsiveNavLink>
 						</div>
 
+						<div className="pt-2 pb-3 space-y-1">
+							<ResponsiveNavLink
+								href={route('user.index')}
+								active={route().current('user.index')}
+							>
+								Usuarios
+							</ResponsiveNavLink>
+						</div>
+
 						{/* <!-- Responsive Settings Options --> */}
 						<div className="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
 							<div className="flex items-center px-4">
@@ -422,7 +474,7 @@ export default function AppLayout({
 								</form>
 
 								{/* <!-- Team Management --> */}
-								{page.props.jetstream.hasTeamFeatures ? (
+								{/* {page.props.jetstream.hasTeamFeatures ? (
 									<>
 										<div className="border-t border-gray-200 dark:border-gray-600"></div>
 
@@ -430,7 +482,6 @@ export default function AppLayout({
 											Administrar equipo
 										</div>
 
-										{/* <!-- Team Settings --> */}
 										<ResponsiveNavLink
 											href={route('teams.show', [
 												page.props.auth.user
@@ -456,7 +507,6 @@ export default function AppLayout({
 
 										<div className="border-t border-gray-200 dark:border-gray-600"></div>
 
-										{/* <!-- Team Switcher --> */}
 										<div className="block px-4 py-2 text-xs text-gray-400">
 											Cambiar de equipo
 										</div>
@@ -495,7 +545,7 @@ export default function AppLayout({
 											),
 										)}
 									</>
-								) : null}
+								) : null} */}
 							</div>
 						</div>
 					</div>

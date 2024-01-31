@@ -1,3 +1,4 @@
+// Lectura correcta
 import cx from 'clsx';
 import axios from 'axios';
 // import React from 'react';
@@ -21,8 +22,6 @@ import SecondaryButton from '@/Components/SecondaryButton';
 // import SaveButton from '@/Components/SaveButton';
 import WarningButton from '@/Components/WarningButton';
 // import SecondaryButton from '@/Components/SecondaryButton';
-// import Swal from 'sweetalert2';
-
 import Swal from 'sweetalert2';
 import '@sweetalert2/themes/dark/dark.css';
 
@@ -43,9 +42,7 @@ import {
 	Group,
 	Text,
 	Center,
-	keys,
 	Checkbox,
-	Avatar,
 	Select,
 	Button,
 } from '@mantine/core';
@@ -79,9 +76,6 @@ interface RowData {
 	dni: string;
 	email: string;
 	password: string;
-	nota1: string;
-	nota2: string;
-	nota3: string;
 }
 
 interface ThProps {
@@ -138,35 +132,14 @@ function Th({ children, reversed, sorted, onSort }: ThProps) {
 //   );
 // }
 
-// function filterData(data: RowData[], search: string) {
-// 	const query = search.toLowerCase().trim();
-// 	console.log('filterData - data:', data);
-// 	console.log('filterData - search:', search);
-// 	if (data.length === 0) {
-// 		return []; // Retorna un arreglo vacío si no hay datos
-// 	}
-// 	// return data.filter(item =>
-// 	// 	Object.keys(data[0]).some(key =>
-// 	// 		String(item[key]).toLowerCase().includes(query),
-// 	// 	),
-// 	// );
-// 	const filteredData = data.filter(item =>
-// 		Object.keys(data[0]).some(key =>
-// 			String(item[key]).toLowerCase().includes(query),
-// 		),
-// 	);
-
-// 	console.log('filterData - filteredData:', filteredData);
-// 	return filteredData;
-// }
-function filterData(data, search) {
+function filterData(data: RowData[], search: string) {
 	const query = search.toLowerCase().trim();
 	if (data.length === 0) {
 		return []; // Retorna un arreglo vacío si no hay datos
 	}
 	return data.filter(item =>
-		Object.keys(item.user).some(key =>
-			String(item.user[key]).toLowerCase().includes(query),
+		Object.keys(data[0]).some(key =>
+			String(item[key]).toLowerCase().includes(query),
 		),
 	);
 }
@@ -197,33 +170,6 @@ function filterData(data, search) {
 // 	);
 // }
 
-// function sortData(data, payload) {
-// 	const { sortBy, reversed, search } = payload;
-
-// 	if (!sortBy) {
-// 		return filterData(data, search);
-// 	}
-
-// 	return filterData(
-// 		[...data].sort((a, b) => {
-// 			console.log('Valor de a[sortBy]:', a[sortBy]);
-// 			console.log('Valor de b[sortBy]:', b[sortBy]);
-// 			// Comprueba si el valor es un número
-// 			if (!isNaN(a[sortBy]) && !isNaN(b[sortBy])) {
-// 				// Ordena como número
-// 				return reversed ? b[sortBy] - a[sortBy] : a[sortBy] - b[sortBy];
-// 			} else {
-// 				// Ordena como cadena
-// 				if (reversed) {
-// 					return b[sortBy].localeCompare(a[sortBy]);
-// 				} else {
-// 					return a[sortBy].localeCompare(b[sortBy]);
-// 				}
-// 			}
-// 		}),
-// 		search,
-// 	);
-// }
 function sortData(data, payload) {
 	const { sortBy, reversed, search } = payload;
 
@@ -233,29 +179,16 @@ function sortData(data, payload) {
 
 	return filterData(
 		[...data].sort((a, b) => {
-			const aValue = a.user ? a.user[sortBy] : a[sortBy]; // Accede al valor anidado si existe
-			const bValue = b.user ? b.user[sortBy] : b[sortBy]; // Accede al valor anidado si existe
-
-			console.log('Valor de aValue:', aValue);
-			console.log('Valor de bValue:', bValue);
-
-			if (aValue === undefined || bValue === undefined) {
-				console.error(
-					`Error: No se encontró la clave '${sortBy}' en los datos.`,
-				);
-				return 0;
-			}
-
 			// Comprueba si el valor es un número
-			if (!isNaN(aValue) && !isNaN(bValue)) {
+			if (!isNaN(a[sortBy]) && !isNaN(b[sortBy])) {
 				// Ordena como número
-				return reversed ? bValue - aValue : aValue - bValue;
+				return reversed ? b[sortBy] - a[sortBy] : a[sortBy] - b[sortBy];
 			} else {
 				// Ordena como cadena
 				if (reversed) {
-					return bValue.localeCompare(aValue);
+					return b[sortBy].localeCompare(a[sortBy]);
 				} else {
-					return aValue.localeCompare(bValue);
+					return a[sortBy].localeCompare(b[sortBy]);
 				}
 			}
 		}),
@@ -263,18 +196,16 @@ function sortData(data, payload) {
 	);
 }
 
-export default function Dashboard(props) {
+import { User } from '@/types';
+
+interface Props {
+	users: User;
+}
+
+export default function Dashboard({ users }: Props) {
 	const route = useRoute();
 
-	const [estudiantes, setEstudiantes] = useState(props.estudiantes);
-
-	// const estudiantes = props.estudiantes; // Asumiendo que 'estudiantes' es pasado como prop
-
-	// estudiantes.forEach(estudiante => {
-	// 	console.log(estudiante.user.dni); // Accede al name del usuario relacionado
-	// 	console.log(estudiante.nota1); // Accede a la nota1 del estudiante
-	// 	// ... otros campos
-	// });
+	const [estudiantes, setEstudiantes] = useState(users);
 
 	// const [modal, setModal] = useState(false);
 	const [title, setTitle] = useState('');
@@ -338,8 +269,8 @@ export default function Dashboard(props) {
 	// } = useForm({
 	// 	id: '',
 	// 	name: '',
-	// 	apellido_pat: '',
-	// 	apellido_mat: '',
+	// 	paternal: '',
+	// 	maternal: '',
 	// 	fecha_nac: '',
 	// 	nota1: '',
 	// 	departamento: '',
@@ -348,7 +279,6 @@ export default function Dashboard(props) {
 	const form = useForm({
 		initialValues: {
 			id: '',
-			// user_id: '',
 			name: '',
 			paternal: '',
 			maternal: '',
@@ -360,14 +290,11 @@ export default function Dashboard(props) {
 			dni: '',
 			email: '',
 			password: '',
-			nota1: '',
-			nota2: '',
-			nota3: '',
 		},
 
 		validate: {
 			name: value => {
-				if (!value) return 'El name es requerido';
+				if (!value) return 'El nombre es requerido';
 				if (value.length > 25)
 					return 'El Nombre muy largo (máx. 25 caracteres)';
 				if (/\d/.test(value)) return 'Nombre no debe contener números';
@@ -451,38 +378,6 @@ export default function Dashboard(props) {
 					return 'La contraseña debe contener letras y números';
 				return null;
 			},
-			nota1: value => {
-				if (!value) return 'Nota 1 es requerido';
-				if (!/^-?\d+$/.test(value))
-					return 'Nota 1 debe ser un número entero';
-				const nota = parseInt(value, 10);
-				if (nota < 0) return 'Nota 1 no puede ser negativo';
-
-				if (nota > 20) return 'Nota 1 debe estar entre 0 y 20';
-				return null;
-			},
-
-			nota2: value => {
-				if (!value) return 'Nota 2 es requerido';
-				if (!/^-?\d+$/.test(value))
-					return 'Nota 2 debe ser un número entero';
-				const nota = parseInt(value, 10);
-				if (nota < 0) return 'Nota 2 no puede ser negativo';
-
-				if (nota > 20) return 'Nota 2 debe estar entre 0 y 20';
-				return null;
-			},
-
-			nota3: value => {
-				if (!value) return 'Nota 3 es requerido';
-				if (!/^-?\d+$/.test(value))
-					return 'Nota 3 debe ser un número entero';
-				const nota = parseInt(value, 10);
-				if (nota < 0) return 'Nota 3 no puede ser negativo';
-
-				if (nota > 20) return 'Nota 3debe estar entre 0 y 20';
-				return null;
-			},
 		},
 	});
 
@@ -505,7 +400,6 @@ export default function Dashboard(props) {
 	const openModal = (
 		op,
 		id,
-		// user_id,
 		name,
 		paternal,
 		maternal,
@@ -517,21 +411,15 @@ export default function Dashboard(props) {
 		dni,
 		email,
 		password,
-		nota1,
-		nota2,
-		nota3,
 	) => {
 		// setModal(true),
-
 		setDepartamento(departamento);
 		setProvincia(provincia);
 		setDistrito(distrito);
 		open();
 		setOperation(op);
-		// console.log(user_id);
 		form.setValues({
 			id: op === 2 ? id : '',
-			// user_id: user_id,
 			name: name,
 			paternal: paternal,
 			maternal: maternal,
@@ -543,16 +431,13 @@ export default function Dashboard(props) {
 			dni: dni,
 			email: email,
 			password: password,
-			nota1: formatGrade(nota1),
-			nota2: formatGrade(nota2),
-			nota3: formatGrade(nota3),
 		});
 
 		if (op === 1) {
-			setTitle('Añadir estudiante');
+			setTitle('Añadir usuario');
 			setDateValue(null);
 		} else {
-			setTitle('Editar estudiante');
+			setTitle('Editar usuario');
 			setDateValue(fecha_nac ? dayjs(fecha_nac).toDate() : null);
 		}
 	};
@@ -561,119 +446,11 @@ export default function Dashboard(props) {
 		close();
 	};
 
-	// const save = e => {
-	// 	e.preventDefault();
-	// 	if (operation === 1) {
-	// 		post(route('estudiantes.store'), {
-	// 			// onSuccess: () => {
-	// 			// 	ok('Estudiante añadido con éxito');
-	// 			// },
-	// 			onSuccess: response => {
-	// 				// Suponiendo que response.props.estudiante contiene el estudiante añadido
-	// 				const nuevoEstudiante = response.props.estudiante;
-	// 				setEstudiantes(estudiantesActuales => [
-	// 					...estudiantesActuales,
-	// 					nuevoEstudiante,
-	// 				]);
-	// 				setSortedData(sortedDataActuales => [
-	// 					...sortedDataActuales,
-	// 					nuevoEstudiante,
-	// 				]);
-	// 				ok('Estudiante añadido con éxito');
-	// 			},
-	// 			onError: () => {
-	// 				if (errors.name) {
-	// 					reset('name');
-	// 					NombreInput.current.focus();
-	// 				}
-	// 				if (errors.apellido_pat) {
-	// 					reset('apellido_pat');
-	// 					Apellido_Pat_Input.current.focus();
-	// 				}
-	// 				if (errors.apellido_mat) {
-	// 					reset('apellido_mat');
-	// 					Apellido_Mat_Input.current.focus();
-	// 				}
-	// 				if (errors.fecha_nac) {
-	// 					reset('fecha_nac');
-	// 					Fecha_Nac_Input.current.focus();
-	// 				}
-	// 				if (errors.nota1) {
-	// 					reset('nota1');
-	// 					Nota1Input.current.focus();
-	// 				}
-	// 				if (errors.departamento) {
-	// 					reset('departamento');
-	// 					DepartamentoInput.current.focus();
-	// 				}
-	// 			},
-	// 		});
-	// 	} else {
-	// 		put(route('estudiantes.update', data.id), {
-	// 			// onSuccess: () => {
-	// 			// 	ok('Estudiante actualizado con éxito');
-	// 			// },
-	// 			onSuccess: response => {
-	// 				// Suponiendo que response.props.estudiante contiene el estudiante actualizado
-	// 				const estudianteActualizado = response.props.estudiante;
-	// 				setEstudiantes(estudiantesActuales =>
-	// 					estudiantesActuales.map(est =>
-	// 						est.id === estudianteActualizado.id
-	// 							? estudianteActualizado
-	// 							: est,
-	// 					),
-	// 				);
-	// 				setSortedData(sortedDataActuales =>
-	// 					sortedDataActuales.map(est =>
-	// 						est.id === estudianteActualizado.id
-	// 							? estudianteActualizado
-	// 							: est,
-	// 					),
-	// 				);
-	// 				// Actualiza de forma dinámica la página
-	// 				// window.history.pushState(
-	// 				// 	{},
-	// 				// 	'',
-	// 				// 	route('estudiantes.index'),
-	// 				// );
-	// 				ok('Estudiante actualizado con éxito');
-	// 			},
-	// 			onError: () => {
-	// 				if (errors.name) {
-	// 					reset('name');
-	// 					NombreInput.current.focus();
-	// 				}
-	// 				if (errors.apellido_pat) {
-	// 					reset('apellido_pat');
-	// 					Apellido_Pat_Input.current.focus();
-	// 				}
-	// 				if (errors.apellido_mat) {
-	// 					reset('apellido_mat');
-	// 					Apellido_Mat_Input.current.focus();
-	// 				}
-	// 				if (errors.fecha_nac) {
-	// 					reset('fecha_nac');
-	// 					Fecha_Nac_Input.current.focus();
-	// 				}
-	// 				if (errors.nota1) {
-	// 					reset('nota1');
-	// 					Nota1Input.current.focus();
-	// 				}
-	// 				if (errors.departamento) {
-	// 					reset('departamento');
-	// 					DepartamentoInput.current.focus();
-	// 				}
-	// 			},
-	// 		});
-	// 	}
-	// };
 	const save = async values => {
 		setIsSubmitting(true);
 		try {
 			let response;
-
 			const estudianteData = {
-				// user_id: values.user_id,
 				name: values.name,
 				paternal: values.paternal,
 				maternal: values.maternal,
@@ -685,66 +462,42 @@ export default function Dashboard(props) {
 				dni: values.dni,
 				email: values.email,
 				password: values.password,
-				nota1: parseInt(values.nota1, 10), // Asegúrate de enviar un entero
-				nota2: parseInt(values.nota2, 10), // Asegúrate de enviar un entero
-				nota3: parseInt(values.nota3, 10), // Asegúrate de enviar un entero
 			};
-
-			console.log(estudianteData);
 
 			if (operation === 1) {
 				// Añadir un nuevo estudiante
-				response = await axios.post('/estudiantes', estudianteData);
-				const newStudent = response.data.estudiante;
+				response = await axios.post('/user', estudianteData);
+				const newStudent = response.data.user;
 				const updatedStudents = [...estudiantes, newStudent];
 				setEstudiantes(updatedStudents);
 				setSortedData(updatedStudents);
 			} else {
 				// Actualizar un estudiante existente
 				response = await axios.put(
-					`/estudiantes/${values.id}`,
+					`/user/${values.id}`,
 					estudianteData,
 				);
-				console.log(
-					'Respuesta del servidor (Actualizar):',
-					response.data,
+				// console.log('Respuesta del servidor:', response.data);
+				const estudianteActualizado = response.data.user;
+				setEstudiantes(estudiantesActuales =>
+					estudiantesActuales.map(est =>
+						est.id === estudianteActualizado.id
+							? estudianteActualizado
+							: est,
+					),
 				);
-
-				const estudianteActualizado = response.data.estudiante;
-				setEstudiantes(estudiantesActuales => {
-					console.log(
-						'Estudiantes antes de actualizar (Actualizar):',
-						estudiantesActuales,
-					);
-					const estudiantesActualizados = estudiantesActuales.map(
-						est =>
-							est.id === estudianteActualizado.id
-								? estudianteActualizado
-								: est,
-					);
-					console.log(
-						'Estudiantes actualizados (Actualizar):',
-						estudiantesActualizados,
-					);
-					return estudiantesActualizados;
-				});
 			}
-
-			setSortedData(actualSortedData => {
-				console.log(
-					'SortedData antes de actualizar:',
-					actualSortedData,
-				);
-				const newData = actualSortedData.map(est =>
-					est.id === response.data.estudiante.id
-						? response.data.estudiante
-						: est,
-				);
-				console.log('SortedData actualizados:', newData);
-				return newData;
-			});
+			// console.log(
+			// 	'estudiante a actualizar en sortedData:',
+			// 	response.data.user,
+			// );
+			setSortedData(actualSortedData =>
+				actualSortedData.map(est =>
+					est.id === response.data.user.id ? response.data.user : est,
+				),
+			);
 			ok(
-				'Estudiante ' +
+				'Usuario ' +
 					(operation === 1 ? 'añadido' : 'actualizado') +
 					' con éxito',
 			);
@@ -762,51 +515,12 @@ export default function Dashboard(props) {
 		closeModal();
 		Swal.fire({ title: mensaje, icon: 'success' });
 	};
-	// const eliminar = (id, name) => {
-	// 	const alerta = Swal.mixin({ buttonsStyling: true });
-	// 	alerta
-	// 		.fire({
-	// 			title:
-	// 				'¿Estás seguro de eliminar el estudiante ' + name + '?',
-	// 			text: 'Esta operación es irreversible',
-	// 			icon: 'question',
-	// 			showCancelButton: true,
-	// 			// confirmButtonColor:'#3085d6',
-	// 			confirmButtonText:
-	// 				'<i class="fa-solid fa-check"></i> Sí, eliminar',
-	// 			customClass: {
-	// 				confirmButton:
-	// 					'bg-red-600 border border-transparent text-white hover:bg-red-500 active:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800',
-	// 			},
-	// 			cancelButtonText: '<i class="fa-solid fa-ban"></i> Cancelar',
-	// 		})
-	// 		.then(result => {
-	// 			if (result.isConfirmed) {
-	// 				destroy(route('estudiantes.destroy', id), {
-	// 					// onSuccess: () => {
-	// 					// 	ok('Estudiante eliminado');
-	// 					// },
-	// 					onSuccess: () => {
-	// 						setEstudiantes(estudiantesActuales =>
-	// 							estudiantesActuales.filter(
-	// 								est => est.id !== id,
-	// 							),
-	// 						);
-	// 						setSortedData(sortedDataActuales =>
-	// 							sortedDataActuales.filter(est => est.id !== id),
-	// 						);
-	// 						ok('Estudiante eliminado');
-	// 					},
-	// 				});
-	// 			}
-	// 		});
-	// };
 
 	const eliminar = (id, name) => {
 		const alerta = Swal.mixin({ buttonsStyling: true });
 		alerta
 			.fire({
-				title: `¿Estás seguro de eliminar el estudiante ${name}?`,
+				title: `¿Estás seguro de eliminar el usuario ${name}?`,
 				text: 'Esta operación es irreversible',
 				icon: 'question',
 				showCancelButton: true,
@@ -822,7 +536,7 @@ export default function Dashboard(props) {
 				if (result.isConfirmed) {
 					try {
 						// Realizar la petición DELETE usando axios
-						await axios.delete(`/estudiantes/${id}`);
+						await axios.delete(`/user/${id}`);
 
 						// Actualizar el estado para reflejar la eliminación
 						setEstudiantes(estudiantesActuales =>
@@ -877,10 +591,6 @@ export default function Dashboard(props) {
 
 	const setSorting = (field: keyof RowData) => {
 		const reversed = field === sortBy ? !reverseSortDirection : false;
-		console.log('Datos antes de ordenar:', estudiantes);
-		console.log('Clave de ordenamiento (sortBy):', field);
-		console.log('Orden invertido (reverseSortDirection):', reversed);
-
 		setReverseSortDirection(reversed);
 		setSortBy(field);
 		setSortedData(
@@ -901,7 +611,6 @@ export default function Dashboard(props) {
 	};
 
 	const idsToSend = selection.map(id => parseInt(id, 10));
-	// console.log(idsToSend);
 
 	// useEffect(() => {
 	// 	setSortedData(
@@ -916,7 +625,7 @@ export default function Dashboard(props) {
 	const eliminarMultiples = () => {
 		if (selection.length === 0) {
 			Swal.fire(
-				'Por favor, selecciona al menos un estudiante para eliminar.',
+				'Por favor, selecciona al menos un usuario para eliminar.',
 			);
 			return;
 		}
@@ -953,99 +662,26 @@ export default function Dashboard(props) {
 								estudiante =>
 									!idsToSend.includes(estudiante.id),
 							);
-							console.log(updatedData);
 							setEstudiantes(updatedData);
 							setSortedData(updatedData);
-							console.log(selection);
 							setSelection([]);
 						})
 						.catch(error => {
 							Swal.fire(
 								'Error',
-								'Ocurrió un error al eliminar los estudiantes.',
+								'Ocurrió un error al eliminar los usuario.',
 								'error',
 							);
 						});
 				}
 
-				console.log('seleccion despues de post', selection);
-				console.log('idsToSend despues de post', idsToSend);
+				// console.log('seleccion despues de post', selection);
+				// console.log('idsToSend despues de post', idsToSend);
 			});
 	};
 
-	// const eliminarMultiples = () => {
-	// 	if (selection.length === 0) {
-	// 		Swal.fire(
-	// 			'Por favor, selecciona al menos un estudiante para eliminar.',
-	// 		);
-	// 		return;
-	// 	}
-
-	// 	const alerta2 = Swal.mixin({ buttonsStyling: true });
-
-	// 	alerta2
-	// 		.fire({
-	// 			title: '¿Estás seguro?',
-	// 			text: 'Esta acción no se puede deshacer',
-	// 			icon: 'warning',
-	// 			showCancelButton: true,
-	// 			confirmButtonColor: '#3085d6',
-	// 			cancelButtonColor: '#d33',
-	// 			confirmButtonText: 'Sí, eliminar!',
-	// 		})
-	// 		.then(result => {
-	// 			if (result.isConfirmed) {
-	// 				Inertia.post(route('estudiantes.multipleDestroy'), {
-	// 					ids: selection,
-	// 					onSuccess: () => {
-	// 						Swal.fire(
-	// 							'Eliminados!',
-	// 							'Los estudiantes han sido eliminados.',
-	// 							'success',
-	// 						);
-	// 						// Actualiza el estado local para reflejar la eliminación
-	// 						const updatedData = sortedData.filter(
-	// 							estudiante =>
-	// 								!selection.includes(estudiante.id),
-	// 						);
-	// 						setSortedData(updatedData);
-	// 						setSelection([]);
-	// 					},
-	// 					onError: () => {
-	// 						Swal.fire(
-	// 							'Error',
-	// 							'Ocurrió un error al eliminar los estudiantes.',
-	// 							'error',
-	// 						);
-	// 					},
-	// 				});
-	// 			}
-	// 		});
-	// };
-
-	// function formatGrade(grade) {
-	// 	if (grade === 0) {
-	// 		return '00';
-	// 	} else if (grade > 0 && grade < 10) {
-	// 		return '0' + grade;
-	// 	}
-	// 	return grade.toString();
-	// }
-	function formatGrade(grade) {
-		if (grade === null || grade === undefined) {
-			return ''; // O manejar de otra manera
-		}
-		if (grade === 0) {
-			return '00';
-		} else if (grade > 0 && grade < 10) {
-			return '0' + grade;
-		}
-		return grade.toString();
-	}
-
 	const rows = sortedData.map((estudiante, i) => {
-		const selected = selection.includes(estudiante.user.id);
-		console.log(selected);
+		const selected = selection.includes(estudiante.id);
 		return (
 			<Table.Tr
 				key={estudiante.id}
@@ -1053,7 +689,7 @@ export default function Dashboard(props) {
 					[TableSelectionClasses.rowSelected]: selected,
 				})}
 			>
-				<Can perform="estudiantes.multipleDestroy">
+				<Can perform="user.multipleDestroy">
 					<Table.Td>
 						<Checkbox
 							checked={selection.includes(estudiante.id)}
@@ -1063,61 +699,50 @@ export default function Dashboard(props) {
 				</Can>
 				<Table.Td>{i + 1}</Table.Td>
 				<Table.Td style={{ whiteSpace: 'nowrap' }}>
-					{capitalizeWords(estudiante.user.name)}
+					{capitalizeWords(estudiante.name)}
 				</Table.Td>
-				<Table.Td>{capitalizeWords(estudiante.user.paternal)}</Table.Td>
-				<Table.Td>{capitalizeWords(estudiante.user.maternal)}</Table.Td>
+				<Table.Td>{capitalizeWords(estudiante.paternal)}</Table.Td>
+				<Table.Td>{capitalizeWords(estudiante.maternal)}</Table.Td>
 				<Table.Td>
-					{dayjs(estudiante.user.fecha_nac).format('MMMM D, YYYY')}
+					{dayjs(estudiante.fecha_nac).format('MMMM D, YYYY')}
 				</Table.Td>
 
-				<Table.Td>{estudiante.user.departamento}</Table.Td>
-				<Table.Td>{estudiante.user.provincia}</Table.Td>
-				<Table.Td>{estudiante.user.distrito}</Table.Td>
+				<Table.Td>{estudiante.departamento}</Table.Td>
+				<Table.Td>{estudiante.provincia}</Table.Td>
+				<Table.Td>{estudiante.distrito}</Table.Td>
 
-				<Table.Td>{estudiante.user.current_address}</Table.Td>
-				<Table.Td>{estudiante.user.dni}</Table.Td>
-				<Table.Td>{estudiante.user.email}</Table.Td>
+				<Table.Td>{estudiante.current_address}</Table.Td>
+				<Table.Td>{estudiante.dni}</Table.Td>
+				<Table.Td>{estudiante.email}</Table.Td>
+				{/* <Table.Td>{estudiante.password}</Table.Td> */}
 
-				<Table.Td>{formatGrade(estudiante.nota1)}</Table.Td>
-				<Table.Td>{formatGrade(estudiante.nota2)}</Table.Td>
-				<Table.Td>{formatGrade(estudiante.nota3)}</Table.Td>
+				<Table.Td>
+					<div className="flex justify-center items-center w-full h-full">
+						<WarningButton
+							onClick={() =>
+								openModal(
+									2,
+									estudiante.id,
+									estudiante.name,
+									estudiante.paternal,
+									estudiante.maternal,
+									estudiante.fecha_nac,
+									estudiante.departamento,
+									estudiante.provincia,
+									estudiante.distrito,
+									estudiante.current_address,
+									estudiante.dni,
+									estudiante.email,
+									estudiante.password,
+								)
+							}
+						>
+							<i className="fa-solid fa-pen-to-square"></i>
+						</WarningButton>
+					</div>
+				</Table.Td>
 
-				<Can perform="estudiantes.update">
-					<Table.Td>
-						<div className="flex justify-center items-center w-full h-full">
-							<WarningButton
-								onClick={() =>
-									openModal(
-										2,
-
-										estudiante.id,
-										// estudiante.user.id,
-										// estudiante.user.user_id,
-										estudiante.user.name,
-										estudiante.user.paternal,
-										estudiante.user.maternal,
-										estudiante.user.fecha_nac,
-										estudiante.user.departamento,
-										estudiante.user.provincia,
-										estudiante.user.distrito,
-										estudiante.user.current_address,
-										estudiante.user.dni,
-										estudiante.user.email,
-										estudiante.user.password,
-										estudiante.nota1,
-										estudiante.nota2,
-										estudiante.nota3,
-									)
-								}
-							>
-								<i className="fa-solid fa-pen-to-square"></i>
-							</WarningButton>
-						</div>
-					</Table.Td>
-				</Can>
-
-				<Can perform="estudiantes.destroy">
+				<Can perform="user.destroy">
 					<Table.Td>
 						<div className="flex justify-center items-center w-full h-full">
 							<DangerButton
@@ -1135,17 +760,15 @@ export default function Dashboard(props) {
 	});
 
 	// Lugares
-	const [departamento, setDepartamento] = useState(
-		estudiantes.departamento || '',
-	);
-	const [provincia, setProvincia] = useState(estudiantes.provincia || '');
-	const [distrito, setDistrito] = useState(estudiantes.distrito || '');
+	const [departamento, setDepartamento] = useState(users.departamento || '');
+	const [provincia, setProvincia] = useState(users.provincia || '');
+	const [distrito, setDistrito] = useState(users.distrito || '');
 
 	// // Efecto para inicializar estados al montar el componente
 	React.useEffect(() => {
-		setDepartamento(estudiantes.departamento || '');
-		setProvincia(estudiantes.provincia || '');
-		setDistrito(estudiantes.distrito || '');
+		setDepartamento(users.departamento || '');
+		setProvincia(users.provincia || '');
+		setDistrito(users.distrito || '');
 	}, []);
 	// Efecto para inicializar estados al montar el componente
 	// useEffect(() => {
@@ -1210,8 +833,8 @@ export default function Dashboard(props) {
 
 	// Obtiene los distritos para la provincia seleccionada
 	const distritos = provincia ? dataProvincias[provincia] || [] : [];
+
 	function capitalizeWords(str: string): string {
-		if (!str) return ''; // Retorna una cadena vacía si str es undefined o null
 		return str.toLowerCase().replace(/(?:^|\s)\S/g, a => {
 			return a.toUpperCase();
 		});
@@ -1222,20 +845,20 @@ export default function Dashboard(props) {
 			title="Estudiantes"
 			renderHeader={() => (
 				<h2 className="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-					Estudiantes
+					Usuarios
 				</h2>
 			)}
 		>
 			<div className="bg-dark grid v-screen place-items-center pt-6">
 				<div className="mt-3 mb-3 flex justify-end space-x-4">
-					<Can perform="estudiantes.store">
+					<Can perform="user.store">
 						<PrimaryButton onClick={() => openModal(1)}>
 							<i className="fa-solid fa-circle-plus mr-2"></i>
 							Añadir
 						</PrimaryButton>
 					</Can>
 
-					<Can perform="estudiantes.multipleDestroy">
+					<Can perform="user.multipleDestroy">
 						<PrimaryButton onClick={eliminarMultiples}>
 							Eliminar seleccionados
 						</PrimaryButton>
@@ -1272,16 +895,6 @@ export default function Dashboard(props) {
 					classNames={TableScrollAreaClasses}
 					className="mt-3"
 				>
-					{/* <Table.ScrollContainer minWidth={500}> */}
-					{/* <ScrollArea
-					// w={500}
-					h={400}
-					// offsetScrollbars
-					onScrollPositionChange={({ y }) => setScrolled(y !== 0)}
-					scrollbarSize={6}
-					classNames={TableScrollAreaClasses}
-				> */}
-
 					<Table highlightOnHover className="mb-3">
 						{/* <Table.Thead
 							className={cx(TableScrollAreaClasses.header, {
@@ -1294,7 +907,7 @@ export default function Dashboard(props) {
 							})}
 						>
 							<Table.Tr>
-								<Can perform="estudiantes.multipleDestroy">
+								<Can perform="user.multipleDestroy">
 									<Table.Th
 										style={{
 											width: rem(40),
@@ -1392,76 +1005,17 @@ export default function Dashboard(props) {
 								>
 									Email
 								</Th>
-								<Th
-									sorted={sortBy === 'nota1'}
-									reversed={reverseSortDirection}
-									onSort={() => setSorting('nota1')}
-								>
-									Nota 1
-								</Th>
+								<Table.Th className="px-2 py-2">
+									Editar
+								</Table.Th>
 
-								<Th
-									sorted={sortBy === 'nota2'}
-									reversed={reverseSortDirection}
-									onSort={() => setSorting('nota2')}
-								>
-									Nota 2
-								</Th>
-
-								<Th
-									sorted={sortBy === 'nota3'}
-									reversed={reverseSortDirection}
-									onSort={() => setSorting('nota3')}
-								>
-									Nota 3
-								</Th>
-
-								<Can perform="estudiantes.update">
-									<Table.Th className="px-2 py-2">
-										Editar
-									</Table.Th>
-								</Can>
-
-								<Can perform="estudiantes.destroy">
+								<Can perform="user.destroy">
 									<Table.Th className="px-2 py-2">
 										Eliminar
 									</Table.Th>
 								</Can>
 							</Table.Tr>
 						</Table.Tbody>
-						{/* </Table.Thead> */}
-
-						{/* <Table.Tr className="bg-gray-100 dark:bg-gray-800 dark:text-white">
-							<Table.Th className="px-2 py-2">#</Table.Th>
-							<Table.Th className="px-2 py-2">Nombres</Table.Th>
-							<Table.Th className="px-2 py-2">
-								Apellido Paterno
-							</Table.Th>
-							<Table.Th className="px-2 py-2">
-								Apellido Materno
-							</Table.Th>
-							<Table.Th className="px-2 py-2">
-								Fecha de Nacimiento
-							</Table.Th>
-							<Table.Th className="px-2 py-2">Editar</Table.Th>
-							<Table.Th className="px-2 py-2">Eliminar</Table.Th>
-						</Table.Tr> */}
-
-						{/* <Table.Tbody>
-							{rows.length > 0 ? (
-                                rows
-                                ) : (
-                                    <Table.Tr>
-									<Table.Td
-                                    colSpan={Object.keys(data[0]).length}
-									>
-                                    <Text fw={500} ta="center">
-                                    Nothing found
-                                    </Text>
-									</Table.Td>
-                                    </Table.Tr>
-                                    )}
-                                </Table.Tbody> */}
 						<Table.Tbody>
 							{rows.length > 0 ? (
 								rows
@@ -1865,90 +1419,6 @@ export default function Dashboard(props) {
 							message={errors.paternal}
 							className="mt-2"
 						></InputError> */}
-						</div>
-						<div>
-							<Flex justify="flex-end">
-								<div className="mt-6 mr-5">
-									{/* <InputLabel for="name" value="Nombres"></InputLabel> */}
-									<TextInput
-										id="nota1"
-										name="nota1"
-										label="Nota 1"
-										{...form.getInputProps('nota1')}
-										placeholder="Nota 1"
-										// ref={Nota1Input}
-										required
-										value={
-											form.values.nota1 !== null &&
-											form.values.nota1 !== undefined
-												? form.values.nota1
-												: ''
-										}
-										onChange={e =>
-											form.setFieldValue(
-												'nota1',
-												e.target.value,
-											)
-										}
-										spellCheck={false}
-										// className="mt-1 block w-full"
-									/>
-								</div>
-
-								<div className="mt-6 mr-5">
-									{/* <InputLabel for="name" value="Nombres"></InputLabel> */}
-									<TextInput
-										id="nota2"
-										name="nota2"
-										label="Nota 2"
-										{...form.getInputProps('nota2')}
-										placeholder="Nota 2"
-										// ref={Nota1Input}
-										required
-										value={
-											form.values.nota2 !== null &&
-											form.values.nota2 !== undefined
-												? form.values.nota2
-												: ''
-										}
-										onChange={e =>
-											form.setFieldValue(
-												'nota2',
-												e.target.value,
-											)
-										}
-										spellCheck={false}
-										// className="mt-1 block w-full"
-									/>
-								</div>
-
-								<div className="mt-6">
-									{/* <InputLabel for="name" value="Nombres"></InputLabel> */}
-									<TextInput
-										id="nota3"
-										name="nota3"
-										label="Nota 3"
-										{...form.getInputProps('nota3')}
-										placeholder="Nota 3"
-										// ref={Nota1Input}
-										required
-										value={
-											form.values.nota3 !== null &&
-											form.values.nota3 !== undefined
-												? form.values.nota3
-												: ''
-										}
-										onChange={e =>
-											form.setFieldValue(
-												'nota3',
-												e.target.value,
-											)
-										}
-										spellCheck={false}
-										// className="mt-1 block w-full"
-									/>
-								</div>
-							</Flex>
 						</div>
 					</form>
 				</ScrollArea>

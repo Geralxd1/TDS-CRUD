@@ -10,8 +10,11 @@ import { createInertiaApp } from '@inertiajs/react';
 import { RouteContext } from '@/Hooks/useRoute';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 
-import { MantineProvider, createTheme, Input, ScrollArea } from '@mantine/core';
+import { MantineProvider, createTheme, Input } from '@mantine/core';
 import inputClasses from '../css/Input.module.css';
+
+import { Provider } from 'react-redux';
+import { store } from './store';
 
 const myTheme = createTheme({
 	primaryColor: 'blue',
@@ -41,12 +44,15 @@ createInertiaApp({
 	setup({ el, App, props }) {
 		const root = createRoot(el);
 		return root.render(
-			<MantineProvider defaultColorScheme="dark" theme={myTheme}>
-				<RouteContext.Provider value={(window as any).route}>
-					<App {...props} />
-				</RouteContext.Provider>
+			<Provider store={store}>
+				<MantineProvider defaultColorScheme="dark" theme={myTheme}>
+					<RouteContext.Provider value={(window as any).route}>
+						<App {...props} />
+					</RouteContext.Provider>
+					,
+				</MantineProvider>
 				,
-			</MantineProvider>,
+			</Provider>,
 		);
 	},
 });

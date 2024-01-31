@@ -4,6 +4,7 @@ namespace App\Actions\Fortify;
 
 use App\Models\Team;
 use App\Models\User;
+use App\Models\Estudiantes;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -25,8 +26,8 @@ class CreateNewUser implements CreatesNewUsers
         Validator::make($input, [
             'name' => ['required', 'string', 'max:25', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/'],
             // 'surname' => ['required', 'string', 'max:255'],
-            'paternal' => ['required', 'string', 'max:15', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/'],
-            'maternal' => ['required', 'string', 'max:15', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/'],
+            'paternal' => ['required', 'string', 'max:25', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/'],
+            'maternal' => ['required', 'string', 'max:25', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/'],
             'dni' => ['required', 'size:8', 'regex:/^[0-9]+$/', 'unique:users'],
             'email' => ['required', 'string', 'email', 'max:40', 'unique:users'],
             'password' => $this->passwordRules(),
@@ -38,7 +39,8 @@ class CreateNewUser implements CreatesNewUsers
             'distrito' => ['required', 'string', 'max:30', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/'],
 
 
-            'current_address' => ['required', 'string', 'max:70', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/'],
+            'current_address' => ['required', 'string', 'max:70', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s.,()-]+$/'],
+
 
             'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature() ? ['accepted', 'required'] : '',
         ])->validate();
@@ -59,6 +61,21 @@ class CreateNewUser implements CreatesNewUsers
                 'password' => Hash::make($input['password']),
             ]), function (User $user) {
                 $this->createTeam($user);
+                // Asignar el rol 'student' al usuario
+                $user->assignRole('student');
+
+                // Crear un registro en la tabla estudiantes si el usuario tiene el rol 'student'
+                if ($user->hasRole('student')) {
+                    Estudiantes::create([
+                        'user_id' => $user->id,
+                        // Establece los valores por defecto o basados en $input para 'nota1', 'nota2', 'nota3', etc.
+                        'nota1' => $input['nota1'] ?? 0, // Asigna 0 si no hay valor
+                        'nota2' => $input['nota2'] ?? 0, // Asigna 0 si no hay valor
+                        'nota3' => $input['nota3'] ?? 0, // Asigna 0 si no hay valor
+
+                        // Añade cualquier otro campo que necesites inicializar
+                    ]);
+                }
             });
         });
     }
